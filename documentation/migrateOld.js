@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { up } = require('../migrations/20230713120000_create_users_table');
-const logger = require('../utils/logger');
+const logger = require('../src/utils/logger');
 
 const MONGODB_URI = "mongodb://127.0.0.1:27017/monkey-nets";
 mongoose.set('strictQuery', false);

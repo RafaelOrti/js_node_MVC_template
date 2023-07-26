@@ -1,7 +1,8 @@
-const winston = require('winston');
+// const winston = require('winston');
 const path = require('path');
-const { DailyRotateFile } = require('winston-daily-rotate-file');
-
+// const { DailyRotateFile } = require('winston-daily-rotate-file');
+var winston = require('winston')
+winston.transports.DailyRotateFile = require('winston-daily-rotate-file');
 // Define el nivel de registro según el entorno
 const logLevel = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
@@ -20,7 +21,7 @@ const logger = winston.createLogger({
     })
   ),
   transports: [
-    new DailyRotateFile({
+    new winston.transports.DailyRotateFile({
       filename: path.join(__dirname, 'logs', 'error-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       level: 'error',
@@ -28,7 +29,7 @@ const logger = winston.createLogger({
       maxSize: '5m',
       format: winston.format.json()
     }),
-    new DailyRotateFile({
+    new winston.transports.DailyRotateFile({
       filename: path.join(__dirname, 'logs', 'combined-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       maxFiles: '5d',
@@ -37,7 +38,7 @@ const logger = winston.createLogger({
     })
   ],
   exceptionHandlers: [
-    new DailyRotateFile({
+    new winston.transports.DailyRotateFile({
       filename: path.join(__dirname, 'logs', 'exceptions-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       maxFiles: '5d',

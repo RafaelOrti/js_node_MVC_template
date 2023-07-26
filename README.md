@@ -331,3 +331,6 @@ Este proyecto está licenciado bajo la licencia MIT. Consulta el archivo LICENSE
 
 
 
+
+node user_migration.js up
+node user_migration.js down

@@ -1,53 +1,80 @@
-const { expect } = require('chai');
+const mongoose = require('mongoose');
 const User = require('../../app/models/User');
 
 describe('User Model', () => {
-  describe('Validation', () => {
-    it('should be invalid if username is empty', (done) => {
-      const user = new User();
-
-      user.validate((err) => {
-        expect(err.errors.username).to.exist;
-        done();
-      });
-    });
-
-    it('should be valid if username is provided', (done) => {
-      const user = new User({ username: 'john.doe' });
-
-      user.validate((err) => {
-        expect(err).to.be.null;
-        done();
-      });
+  beforeAll(async () => {
+    // Connect to the in-memory database
+    await mongoose.connect('mongodb://localhost/testdb', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
     });
   });
 
-  describe('Methods', () => {
-    it('should generate a hashed password', () => {
-      const user = new User({ username: 'john.doe', password: 'password' });
+  afterAll(async () => {
+    // Disconnect from the in-memory database
+    await mongoose.disconnect();
+  });
 
-      user.generateHashedPassword();
+  afterEach(async () => {
+    // Clear the database after each test
+    await User.deleteMany();
+  });
 
-      expect(user.password).to.not.equal('password');
-      expect(user.password).to.have.lengthOf(60);
+  describe('Create User', () => {
+    it('should create and save a new user', async () => {
+      const userData = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password123',
+      };
+
+      const newUser = new User(userData);
+      const savedUser = await newUser.save();
+
+      expect(savedUser._id).toBeDefined();
+      expect(savedUser.name).toBe(userData.name);
+      expect(savedUser.email).toBe(userData.email);
+      expect(savedUser.password).toBe(userData.password);
+      expect(savedUser.createdAt).toBeDefined();
     });
 
-    it('should verify a correct password', () => {
-      const user = new User({ username: 'john.doe', password: 'password' });
+    it('should require the name, email, and password fields', async () => {
+      const user = new User({});
 
-      user.generateHashedPassword();
+      let error;
+      try {
+        await user.validate();
+      } catch (err) {
+        error = err;
+      }
 
-      const isPasswordValid = user.verifyPassword('password');
-      expect(isPasswordValid).to.be.true;
+      expect(error).toBeDefined();
+      expect(error.errors.name).toBeDefined();
+      expect(error.errors.email).toBeDefined();
+      expect(error.errors.password).toBeDefined();
     });
 
-    it('should not verify an incorrect password', () => {
-      const user = new User({ username: 'john.doe', password: 'password' });
+    it('should require a unique email', async () => {
+      const userData = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password123',
+      };
 
-      user.generateHashedPassword();
+      await User.create(userData);
 
-      const isPasswordValid = user.verifyPassword('incorrectPassword');
-      expect(isPasswordValid).to.be.false;
+      const duplicateUser = new User(userData);
+
+      let error;
+      try {
+        await duplicateUser.save();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeDefined();
+      expect(error.code).toBe(11000);
     });
   });
 });

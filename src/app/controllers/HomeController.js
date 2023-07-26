@@ -1,7 +1,6 @@
 const User = require('../models/User');
-const logger = require('../utils/logger');
+const logger = require('../../utils/logger');
 const handleError = require('../utils/errorHandler');
-const handleError = require('../../config/appInfo');
 
 const HomeController = {
   index: async (req, res) => {

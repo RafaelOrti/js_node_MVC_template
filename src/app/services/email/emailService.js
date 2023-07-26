@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
-const logger = require('../utils/logger');
-const handleError = require('../utils/errorHandler');
+const logger = require('../../../utils/logger');
+const handleError = require('../../utils/errorHandler');
 
 const EmailService = {
   createTransporter: (config) => {

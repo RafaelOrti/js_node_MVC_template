@@ -1,5 +1,5 @@
 const User = require('../src/app/models/User');
-const handleError = require('../utils/handleError');
+const handleError = require('../utils/errorHandler');
 
 const UserController = {
   getAllUsers: async (req, res) => {

@@ -1,21 +1,42 @@
 const mongoose = require('mongoose');
-const {
-  MONGODB_URI
-} = require('../../.env');
+mongoose.set('strictQuery', false);
+const logger = require('../utils/logger');
 
-const connectDatabase = async () => {
-  await mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false
-  }, (err) => {
-    if (err) {
-      console.log("error in connection", err);
-    } else {
-      console.log("mongodb is connected");
+// Cargar las variables de entorno desde el archivo .env
+require('dotenv').config({ path: __dirname + '/./../../.env' });
+
+// Función para conectar a la base de datos de MongoDB
+const connectToDatabase = async () => {
+  try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('La variable de entorno MONGODB_URI no está configurada. Por favor, asegúrate de configurarla en el archivo .env.');
     }
-  });
+
+    await mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
+    logger.info('Conexión a la base de datos de MongoDB establecida');
+  } catch (error) {
+    logger.error('Error al conectar a MongoDB:', error);
+    throw new Error('Error en la conexión a la base de datos');
+  }
 };
 
-module.exports = connectDatabase;
+// Función para cerrar la conexión a la base de datos de MongoDB
+const closeDatabaseConnection = async () => {
+  try {
+    await mongoose.connection.close();
+    logger.info('Conexión a la base de datos de MongoDB cerrada');
+  } catch (error) {
+    logger.error('Error al cerrar la conexión a MongoDB:', error);
+    throw new Error('Error al cerrar la conexión a la base de datos');
+  }
+};
+
+// Exportar las funciones de conexión a la base de datos
+module.exports = {
+  connectToDatabase,
+  closeDatabaseConnection
+};
+
+// TO DO: Búsqueda de datos de freemium para saber qué les interesa
+// TYPESCRIPT
+// O T.DS

@@ -1,58 +1,75 @@
-const {
-  expect
-} = require('chai');
-const sinon = require('sinon');
-const AuthService = require('../../app/services/AuthService');
-const User = require('../../app/models/User');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const AuthService = require('./authservice');
 
 describe('AuthService', () => {
-  describe('generateAccessToken', () => {
-    it('should generate an access token', () => {
-      const user = new User({
-        username: 'john.doe'
-      });
+  describe('hashPassword', () => {
+    it('should hash the password', async () => {
+      const password = 'password123';
+      const hashedPassword = await AuthService.hashPassword(password);
 
-      const accessToken = AuthService.generateAccessToken(user);
-
-      expect(accessToken).to.be.a('string');
-      expect(accessToken).to.have.lengthOf.above(0);
+      expect(hashedPassword).toBeDefined();
+      expect(hashedPassword).not.toBe(password);
     });
   });
 
-  describe('authenticateUser', () => {
-    it('should authenticate a valid user', async () => {
-      const username = 'john.doe';
-      const password = 'password';
+  describe('comparePasswords', () => {
+    it('should return true when comparing correct passwords', async () => {
+      const password = 'password123';
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-      const user = new User({
-        username,
-        password
-      });
-      sinon.stub(User, 'findOne').resolves(user);
-
-      const authenticatedUser = await AuthService.authenticateUser(username,
-        password);
-
-      expect(authenticatedUser).to.deep.equal(user);
-      expect(User.findOne.calledOnce).to.be.true;
-
-      User.findOne.restore();
+      const isMatch = await AuthService.comparePasswords(password, hashedPassword);
+      expect(isMatch).toBe(true);
     });
 
-    it('should throw an error for an invalid user', async () => {
-      const username = 'john.doe';
-      const password = 'password';
+    it('should return false when comparing incorrect passwords', async () => {
+      const password = 'password123';
+      const incorrectPassword = 'wrongpassword';
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-      sinon.stub(User, 'findOne').resolves(null);
+      const isMatch = await AuthService.comparePasswords(incorrectPassword, hashedPassword);
+      expect(isMatch).toBe(false);
+    });
+  });
 
-      try {
-        await AuthService.authenticateUser(username, password);
-      } catch (error) {
-        expect(error.message).to.equal('Invalid username or password');
-        expect(User.findOne.calledOnce).to.be.true;
+  describe('generateToken', () => {
+    it('should generate a valid JWT token', () => {
+      const payload = { userId: '123456789' };
+      const secretKey = 'your_secret_key';
+      const expiresIn = '1h';
 
-        User.findOne.restore();
-      }
+      const token = AuthService.generateToken(payload, secretKey, expiresIn);
+      const decoded = jwt.verify(token, secretKey);
+
+      expect(decoded.userId).toBe(payload.userId);
+    });
+  });
+
+  describe('verifyToken', () => {
+    it('should return the decoded payload when the token is valid', () => {
+      const payload = { userId: '123456789' };
+      const secretKey = 'your_secret_key';
+      const expiresIn = '1h';
+
+      const token = jwt.sign(payload, secretKey, { expiresIn });
+      const decoded = AuthService.verifyToken(token, secretKey);
+
+      expect(decoded).toBeDefined();
+      expect(decoded.userId).toBe(payload.userId);
+    });
+
+    it('should return null when the token is invalid or expired', () => {
+      const payload = { userId: '123456789' };
+      const secretKey = 'your_secret_key';
+      const expiresIn = '1s';
+
+      const token = jwt.sign(payload, secretKey, { expiresIn });
+
+      // Wait for 2 seconds to make the token invalid
+      setTimeout(() => {
+        const decoded = AuthService.verifyToken(token, secretKey);
+        expect(decoded).toBeNull();
+      }, 2000);
     });
   });
 });
