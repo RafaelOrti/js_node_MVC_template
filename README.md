@@ -1,5 +1,5 @@
 ¿Qué es React en MVC?
-React nos permite diseñar e implementar la interface de una aplicación web. Se puede decir que es la V en un patrón MVC (Model, View, Controller) o MVVM (Model-View-ViewModel).
+React nos permite diseñar e implementar la interface de una aplicación web.
 Si se usa en angular
 
 
