@@ -1,12 +1,4 @@
-What is React in MVC?
-React allows us to design and implement the interface of a web application.
-If used in angular
-
-
-
---------------------------------------
-
-# My project
+# MVC DTO pattern nodejs (WORK IN PROGRESS)
 
 This is a Node.js project that follows a professional and scalable framework using the Model-View-Controller (MVC) design pattern for the backend.
 
