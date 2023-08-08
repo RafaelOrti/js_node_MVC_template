@@ -8,6 +8,7 @@ This is a Node.js project that follows a professional and scalable framework usi
    - `app`: Main directory of the application.
      - `controllers`: Contains the controllers of the application.
      - `models`: Contains the data models of the application.
+     - `DTdtos`: Contains the dtos of the application.
      - `views`: Contains the views of the application.
      - `routes`: Contains the routes of the application.
      - `helpers`: Contains the helpers of the application.
